@@ -198,10 +198,16 @@ COPY ./docker/gunicorn/logging.conf /etc/gunicorn/logging.conf
 # - Create default user `romm` (1000) and group `romm` (1000).
 # - Create base directories and make default user/group the owner.
 # - Make nginx configuration files writable by everyone for `envsubst` to work
+# - Use GID 0 (root group) ownership + chmod g=u on writable runtime paths so
+#   the image works with any UID assigned by Kubernetes/OpenShift (the process
+#   is always a member of supplemental group 0). This is the Red Hat / OCI
+#   arbitrary-UID pattern and satisfies runAsNonRoot + fsGroup in K8s pods.
 RUN addgroup -g 1000 -S romm && adduser -u 1000 -D -S -G romm romm && \
     mkdir /romm /redis-data && \
-    chown romm:romm /romm /redis-data && \
-    chmod 755 /romm /redis-data && \
+    chown 1000:0 /romm /redis-data && \
+    chmod g=u /romm /redis-data && \
+    chown 0:0 ${WEBSERVER_FOLDER}/assets/romm && \
+    chmod g=u ${WEBSERVER_FOLDER}/assets/romm && \
     chmod -R a+w /etc/nginx/conf.d && \
     chmod -R a+w /etc/gunicorn
 
