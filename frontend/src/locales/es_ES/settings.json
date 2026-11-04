@@ -372,6 +372,8 @@
   "scan-artwork-overrides-desc": "Opcionalmente, usa un orden de proveedores diferente para campos de ilustraciones específicos. Cuando está desactivado, cada campo sigue la prioridad de ilustraciones de arriba.",
   "scan-artwork-priority": "Prioridad de ilustraciones",
   "scan-artwork-priority-desc": "Ordena los proveedores usados para carátulas y capturas. Los proveedores se prueban de arriba a abajo; los desactivados se omiten.",
+  "scan-export-replace-assets": "Reemplazar los recursos exportados existentes",
+  "scan-export-replace-assets-desc": "Reemplaza los archivos multimedia exportados correspondientes cuando se exporta este formato después de un análisis.",
   "scan-gamelist": "Exportación de gamelist ES-DE / Batocera",
   "scan-gamelist-export": "Exportar gamelist.xml tras el escaneo",
   "scan-gamelist-export-desc": "Escribir un archivo gamelist.xml para ES-DE, Batocera y RetroBAT al completarse un escaneo.",

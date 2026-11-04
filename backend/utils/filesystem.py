@@ -118,17 +118,21 @@ def link_or_copy_file(source: Path, dest: Path) -> None:
         raise
 
 
-def place_export_asset(source: Path, dest: Path) -> bool:
-    """Link or copy an exported asset to ``dest``, keeping one already there.
+def place_export_asset(
+    source: Path, dest: Path, *, replace_existing: bool = False
+) -> bool:
+    """Link or copy an exported asset to ``dest``.
 
-    Returns: whether ``dest`` holds the asset afterwards.
+    Returns whether ``dest`` holds the asset afterwards.
     """
-    if dest.exists():
+    if dest.exists() and not replace_existing:
         return True
 
     # Metadata scanned before unfetched media paths were cleared can still
     # point at files that were never downloaded.
     if not source.is_file():
+        if dest.is_file():
+            return True
         log.debug(f"Skipping asset {source}: source file is missing")
         return False
 

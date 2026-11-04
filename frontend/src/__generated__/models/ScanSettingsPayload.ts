@@ -20,8 +20,10 @@ export type ScanSettingsPayload = {
     language_priority: Array<string>;
     media: Array<MetadataMediaType>;
     gamelist_export: boolean;
+    gamelist_replace_assets?: boolean;
     gamelist_thumbnail: MetadataMediaType;
     gamelist_image: MetadataMediaType;
     pegasus_export: boolean;
+    pegasus_replace_assets?: boolean;
 };
 

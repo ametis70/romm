@@ -42,9 +42,11 @@ class ConfigResponse(TypedDict):
     SCAN_LANGUAGE_PRIORITY: list[str]
     SCAN_MEDIA: list[str]
     GAMELIST_AUTO_EXPORT_ON_SCAN: bool
+    GAMELIST_REPLACE_ASSETS: bool
     GAMELIST_MEDIA_THUMBNAIL: MetadataMediaType
     GAMELIST_MEDIA_IMAGE: MetadataMediaType
     PEGASUS_AUTO_EXPORT_ON_SCAN: bool
+    PEGASUS_REPLACE_ASSETS: bool
     CONVERTO: ConvertoConfig
     # Platform slug -> the formats its library can be stored in.
     CONVERTO_LIBRARY_TARGETS: dict[str, list[str]]

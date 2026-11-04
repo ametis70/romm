@@ -961,6 +961,20 @@ class TestLibraryStructure:
         }
         assert exported == expected
 
+        for rom in roms:
+            source = fs_resource_handler.base_path / f"apple-iigs/covers/{rom.id}.jpg"
+            source.unlink()
+            source.write_bytes(f"updated-{rom.id}".encode())
+
+        exporter = PegasusExporter(local_export=True, replace_assets=True)
+        assert (
+            await exporter.export_platform_to_file(structured_platform.id, request=None)
+            is True
+        )
+        assert {(platform_dir / path).read_bytes() for path in expected} == {
+            f"updated-{rom.id}".encode() for rom in roms
+        }
+
     async def test_existing_entries_are_matched_by_path(
         self, structured_platform: Platform
     ):

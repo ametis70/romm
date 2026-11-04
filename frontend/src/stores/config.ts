@@ -48,9 +48,11 @@ const defaultConfig = {
   SCAN_LANGUAGE_PRIORITY: [],
   SCAN_MEDIA: [],
   GAMELIST_AUTO_EXPORT_ON_SCAN: false,
+  GAMELIST_REPLACE_ASSETS: false,
   GAMELIST_MEDIA_THUMBNAIL: "box2d",
   GAMELIST_MEDIA_IMAGE: "screenshot",
   PEGASUS_AUTO_EXPORT_ON_SCAN: false,
+  PEGASUS_REPLACE_ASSETS: false,
   CONVERTO: {
     download_conversion_enabled: false,
     scan_metadata: true,

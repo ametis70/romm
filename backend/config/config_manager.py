@@ -525,7 +525,9 @@ class Config:
     EXCLUDED_MULTI_PARTS_EXT: list[str]
     EXCLUDED_MULTI_PARTS_FILES: list[str]
     GAMELIST_AUTO_EXPORT_ON_SCAN: bool
+    GAMELIST_REPLACE_ASSETS: bool
     PEGASUS_AUTO_EXPORT_ON_SCAN: bool
+    PEGASUS_REPLACE_ASSETS: bool
     PLATFORMS_BINDING: dict[str, str]
     PLATFORMS_VERSIONS: dict[str, str]
     STRUCTURE_TEMPLATES: dict[str, str | list[str]]
@@ -917,6 +919,9 @@ class ConfigManager:
             GAMELIST_AUTO_EXPORT_ON_SCAN=get_nested(
                 self._raw_config, "scan.gamelist.export", False
             ),
+            GAMELIST_REPLACE_ASSETS=get_nested(
+                self._raw_config, "scan.gamelist.replace_assets", False
+            ),
             GAMELIST_MEDIA_THUMBNAIL=get_nested(
                 self._raw_config,
                 "scan.gamelist.media.thumbnail",
@@ -929,6 +934,9 @@ class ConfigManager:
             ),
             PEGASUS_AUTO_EXPORT_ON_SCAN=get_nested(
                 self._raw_config, "scan.pegasus.export", False
+            ),
+            PEGASUS_REPLACE_ASSETS=get_nested(
+                self._raw_config, "scan.pegasus.replace_assets", False
             ),
             STREAMING_ENABLED=get_nested(self._raw_config, "streaming.enabled", False),
             STREAMING_CONTAINERS=get_nested(
@@ -1155,8 +1163,20 @@ class ConfigManager:
             log.critical("Invalid config.yml: scan.gamelist.export must be a boolean")
             sys.exit(3)
 
+        if not isinstance(self.config.GAMELIST_REPLACE_ASSETS, bool):
+            log.critical(
+                "Invalid config.yml: scan.gamelist.replace_assets must be a boolean"
+            )
+            sys.exit(3)
+
         if not isinstance(self.config.PEGASUS_AUTO_EXPORT_ON_SCAN, bool):
             log.critical("Invalid config.yml: scan.pegasus.export must be a boolean")
+            sys.exit(3)
+
+        if not isinstance(self.config.PEGASUS_REPLACE_ASSETS, bool):
+            log.critical(
+                "Invalid config.yml: scan.pegasus.replace_assets must be a boolean"
+            )
             sys.exit(3)
 
         self.config.PLATFORMS_BINDING = self._validated_platform_map(
@@ -1533,6 +1553,7 @@ class ConfigManager:
                 "media": self.config.SCAN_MEDIA,
                 "gamelist": {
                     "export": self.config.GAMELIST_AUTO_EXPORT_ON_SCAN,
+                    "replace_assets": self.config.GAMELIST_REPLACE_ASSETS,
                     "media": {
                         "thumbnail": str(self.config.GAMELIST_MEDIA_THUMBNAIL),
                         "image": str(self.config.GAMELIST_MEDIA_IMAGE),
@@ -1540,6 +1561,7 @@ class ConfigManager:
                 },
                 "pegasus": {
                     "export": self.config.PEGASUS_AUTO_EXPORT_ON_SCAN,
+                    "replace_assets": self.config.PEGASUS_REPLACE_ASSETS,
                 },
             },
             "converto": dataclasses.asdict(self.config.CONVERTO),
@@ -1652,9 +1674,11 @@ class ConfigManager:
         language_priority: list[str],
         media: list[str],
         gamelist_export: bool,
+        gamelist_replace_assets: bool,
         gamelist_thumbnail: str,
         gamelist_image: str,
         pegasus_export: bool,
+        pegasus_replace_assets: bool,
     ) -> None:
         """Replace the whole scan.* section and persist it to config.yml.
 
@@ -1675,9 +1699,11 @@ class ConfigManager:
         self.config.SCAN_LANGUAGE_PRIORITY = language_priority
         self.config.SCAN_MEDIA = media
         self.config.GAMELIST_AUTO_EXPORT_ON_SCAN = gamelist_export
+        self.config.GAMELIST_REPLACE_ASSETS = gamelist_replace_assets
         self.config.GAMELIST_MEDIA_THUMBNAIL = MetadataMediaType(gamelist_thumbnail)
         self.config.GAMELIST_MEDIA_IMAGE = MetadataMediaType(gamelist_image)
         self.config.PEGASUS_AUTO_EXPORT_ON_SCAN = pegasus_export
+        self.config.PEGASUS_REPLACE_ASSETS = pegasus_replace_assets
         self._update_config_file()
 
     def update_converto_settings(self, converto: ConvertoConfig) -> None:

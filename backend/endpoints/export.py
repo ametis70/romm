@@ -43,6 +43,9 @@ async def export_gamelist_xml(
     local_export: Annotated[
         bool, Query(description="Use local paths instead of URLs")
     ] = False,
+    replace_assets: Annotated[
+        bool, Query(description="Replace existing media files in local exports")
+    ] = False,
 ) -> Response:
     """Export platforms/ROMs to gamelist.xml format and write to platform directories"""
     if not platform_ids:
@@ -54,7 +57,9 @@ async def export_gamelist_xml(
     _assert_platforms_exportable(request, platform_ids)
 
     try:
-        exporter = GamelistExporter(local_export=local_export)
+        exporter = GamelistExporter(
+            local_export=local_export, replace_assets=replace_assets
+        )
         files_written = []
 
         for platform_id in platform_ids:
@@ -98,6 +103,9 @@ async def export_pegasus(
     local_export: Annotated[
         bool, Query(description="Use local paths instead of URLs")
     ] = False,
+    replace_assets: Annotated[
+        bool, Query(description="Replace existing media files in local exports")
+    ] = False,
 ) -> Response:
     """Export platforms/ROMs to Pegasus metadata.pegasus.txt format and write to platform directories"""
     if not platform_ids:
@@ -109,7 +117,9 @@ async def export_pegasus(
     _assert_platforms_exportable(request, platform_ids)
 
     try:
-        exporter = PegasusExporter(local_export=local_export)
+        exporter = PegasusExporter(
+            local_export=local_export, replace_assets=replace_assets
+        )
         files_written = []
 
         for platform_id in platform_ids:

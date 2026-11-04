@@ -626,6 +626,10 @@ async def test_export_platform_to_file_reuses_existing_esde_media(
     assert existing.read_bytes() == b"esde-cover"
     assert list(existing.parent.iterdir()) == [existing]
 
+    exporter = GamelistExporter(local_export=True, replace_assets=True)
+    assert await exporter.export_platform_to_file(platform.id, request=None) is True
+    assert existing.read_bytes() == b"romm-cover"
+
 
 def test_export_gamelist_xml_mix_falls_back_to_miximage_v2(platform_with_roms):
     """RetroBat has a single <mix> tag, so it takes the v2 miximage when v1 is absent."""

@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from fastapi import status
 
+from endpoints import export as export_module
 from utils.gamelist_exporter import GamelistExporter
 from utils.pegasus_exporter import PegasusExporter
 
@@ -45,6 +46,27 @@ def test_export_allows_editor(client, editor_access_token: str, platform, path: 
 
     assert response.status_code == status.HTTP_200_OK
     export_mock.assert_awaited_once()
+
+
+@with_endpoint
+def test_export_can_replace_assets(
+    client, editor_access_token: str, platform, path: str
+):
+    exporter_name = (
+        "GamelistExporter" if path.endswith("gamelist-xml") else "PegasusExporter"
+    )
+    with patch.object(export_module, exporter_name) as exporter_class:
+        exporter = exporter_class.return_value
+        exporter.export_platform_to_file = AsyncMock(return_value=True)
+        query = f"platform_ids={platform.id}&local_export=true&replace_assets=true"
+        response = client.post(
+            f"{path}?{query}",
+            headers={"Authorization": f"Bearer {editor_access_token}"},
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+    exporter_class.assert_called_once_with(local_export=True, replace_assets=True)
+    exporter.export_platform_to_file.assert_awaited_once()
 
 
 @with_endpoint

@@ -73,9 +73,11 @@ class ScanSettingsPayload(BaseModel):
     language_priority: list[str]
     media: list[MetadataMediaType]
     gamelist_export: bool
+    gamelist_replace_assets: bool = False
     gamelist_thumbnail: MetadataMediaType
     gamelist_image: MetadataMediaType
     pegasus_export: bool
+    pegasus_replace_assets: bool = False
 
     @field_validator(
         "metadata_priority",
@@ -185,9 +187,11 @@ def get_config(request: Request) -> ConfigResponse:
         SCAN_LANGUAGE_PRIORITY=cfg.SCAN_LANGUAGE_PRIORITY,
         SCAN_MEDIA=cfg.SCAN_MEDIA,
         GAMELIST_AUTO_EXPORT_ON_SCAN=cfg.GAMELIST_AUTO_EXPORT_ON_SCAN,
+        GAMELIST_REPLACE_ASSETS=cfg.GAMELIST_REPLACE_ASSETS,
         GAMELIST_MEDIA_THUMBNAIL=cfg.GAMELIST_MEDIA_THUMBNAIL,
         GAMELIST_MEDIA_IMAGE=cfg.GAMELIST_MEDIA_IMAGE,
         PEGASUS_AUTO_EXPORT_ON_SCAN=cfg.PEGASUS_AUTO_EXPORT_ON_SCAN,
+        PEGASUS_REPLACE_ASSETS=cfg.PEGASUS_REPLACE_ASSETS,
         CONVERTO=cfg.CONVERTO,
         CONVERTO_LIBRARY_TARGETS={
             slug: sorted(targets)
@@ -347,9 +351,11 @@ async def update_scan_settings(request: Request, payload: ScanSettingsPayload) -
             language_priority=payload.language_priority,
             media=[str(m) for m in payload.media],
             gamelist_export=payload.gamelist_export,
+            gamelist_replace_assets=payload.gamelist_replace_assets,
             gamelist_thumbnail=str(payload.gamelist_thumbnail),
             gamelist_image=str(payload.gamelist_image),
             pegasus_export=payload.pegasus_export,
+            pegasus_replace_assets=payload.pegasus_replace_assets,
         )
     except ConfigNotWritableException as exc:
         log.critical(exc.message)

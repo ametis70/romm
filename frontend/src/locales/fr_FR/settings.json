@@ -372,6 +372,8 @@
   "scan-artwork-overrides-desc": "Utilisez éventuellement un ordre de fournisseurs différent pour certains champs d'artwork. Lorsque cette option est désactivée, chaque champ suit la priorité d'artwork ci-dessus.",
   "scan-artwork-priority": "Priorité des artworks",
   "scan-artwork-priority-desc": "Ordonnez les fournisseurs utilisés pour les jaquettes et les captures d'écran. Les fournisseurs sont essayés de haut en bas ; ceux désactivés sont ignorés.",
+  "scan-export-replace-assets": "Remplacer les médias exportés existants",
+  "scan-export-replace-assets-desc": "Remplace les fichiers multimédias exportés correspondants lorsque ce format est exporté après une analyse.",
   "scan-gamelist": "Export gamelist ES-DE / Batocera",
   "scan-gamelist-export": "Exporter gamelist.xml après le scan",
   "scan-gamelist-export-desc": "Écrire un fichier gamelist.xml pour ES-DE, Batocera et RetroBAT à la fin d'un scan.",

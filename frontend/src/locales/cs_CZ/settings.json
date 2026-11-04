@@ -372,6 +372,8 @@
   "scan-artwork-overrides-desc": "Volitelně použijte jiné pořadí poskytovatelů pro konkrétní pole grafiky. Když je vypnuto, každé pole se řídí prioritou grafiky výše.",
   "scan-artwork-priority": "Priorita grafiky",
   "scan-artwork-priority-desc": "Nastavte pořadí poskytovatelů používaných pro obaly a screenshoty. Poskytovatelé se zkoušejí shora dolů; zakázaní se přeskočí.",
+  "scan-export-replace-assets": "Nahradit existující exportovaná média",
+  "scan-export-replace-assets-desc": "Při exportu tohoto formátu po skenování nahradí odpovídající exportované mediální soubory.",
   "scan-gamelist": "Export gamelist pro ES-DE / Batocera",
   "scan-gamelist-export": "Exportovat gamelist.xml po skenování",
   "scan-gamelist-export-desc": "Zapsat soubor gamelist.xml pro ES-DE, Batocera a RetroBAT po dokončení skenování.",

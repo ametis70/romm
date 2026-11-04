@@ -480,9 +480,11 @@ def test_update_scan_settings_round_trip(tmp_path):
         language_priority=["ja", "en"],
         media=["box2d", "screenshot", "manual"],
         gamelist_export=True,
+        gamelist_replace_assets=True,
         gamelist_thumbnail="box3d",
         gamelist_image="title_screen",
         pegasus_export=True,
+        pegasus_replace_assets=True,
     )
 
     config_text = config_file.read_text()
@@ -499,9 +501,11 @@ def test_update_scan_settings_round_trip(tmp_path):
     assert reloaded.config.SCAN_LANGUAGE_PRIORITY == ["ja", "en"]
     assert reloaded.config.SCAN_MEDIA == ["box2d", "screenshot", "manual"]
     assert reloaded.config.GAMELIST_AUTO_EXPORT_ON_SCAN is True
+    assert reloaded.config.GAMELIST_REPLACE_ASSETS is True
     assert reloaded.config.GAMELIST_MEDIA_THUMBNAIL == "box3d"
     assert reloaded.config.GAMELIST_MEDIA_IMAGE == "title_screen"
     assert reloaded.config.PEGASUS_AUTO_EXPORT_ON_SCAN is True
+    assert reloaded.config.PEGASUS_REPLACE_ASSETS is True
 
 
 def test_config_update_preserves_streaming_section(tmp_path):

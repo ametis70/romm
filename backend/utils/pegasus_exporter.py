@@ -288,8 +288,9 @@ def parse_existing_pegasus(content: str) -> ExistingPegasus:
 class PegasusExporter:
     """Export RomM collections to Pegasus Frontend metadata.pegasus.txt format"""
 
-    def __init__(self, local_export: bool = False):
+    def __init__(self, local_export: bool = False, replace_assets: bool = False):
         self.local_export = local_export
+        self.replace_assets = replace_assets
 
     @staticmethod
     def _resolve_collection(platform: Platform) -> tuple[str, str]:
@@ -518,7 +519,11 @@ class PegasusExporter:
                         dest_path = platform_dir / rel_dest
                     claimed[dest_path] = source_path
 
-                    if place_export_asset(source_path, dest_path):
+                    if place_export_asset(
+                        source_path,
+                        dest_path,
+                        replace_existing=self.replace_assets,
+                    ):
                         exported_assets[asset_key] = rel_dest
 
             entry = self._create_game_entry(

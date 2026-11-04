@@ -212,6 +212,22 @@ class TestPlaceExportAsset:
         assert place_export_asset(source, dest)
         assert dest.read_bytes() == b"old"
 
+    def test_replaces_existing_dest_when_requested(self, tmp_path):
+        source = tmp_path / "source.png"
+        source.write_bytes(b"new")
+        dest = tmp_path / "dest.png"
+        dest.write_bytes(b"old")
+
+        assert place_export_asset(source, dest, replace_existing=True)
+        assert dest.read_bytes() == b"new"
+
+    def test_missing_source_keeps_existing_dest_when_replacing(self, tmp_path):
+        dest = tmp_path / "dest.png"
+        dest.write_bytes(b"old")
+
+        assert place_export_asset(tmp_path / "missing.png", dest, replace_existing=True)
+        assert dest.read_bytes() == b"old"
+
     def test_missing_source_leaves_no_directory(self, tmp_path):
         dest = tmp_path / "out" / "dest.png"
 

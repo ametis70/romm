@@ -41,7 +41,9 @@ def test_config(client):
     assert config.get("GAMELIST_MEDIA_THUMBNAIL") == "box2d"
     assert config.get("GAMELIST_MEDIA_IMAGE") == "screenshot"
     assert config.get("GAMELIST_AUTO_EXPORT_ON_SCAN") is False
+    assert config.get("GAMELIST_REPLACE_ASSETS") is False
     assert config.get("PEGASUS_AUTO_EXPORT_ON_SCAN") is False
+    assert config.get("PEGASUS_REPLACE_ASSETS") is False
 
 
 def test_config_parse_error_gated_by_auth(client, access_token: str):
@@ -182,9 +184,11 @@ def _scan_payload(**overrides):
         "language_priority": ["en", "fr"],
         "media": ["box2d", "screenshot"],
         "gamelist_export": True,
+        "gamelist_replace_assets": True,
         "gamelist_thumbnail": "box2d",
         "gamelist_image": "screenshot",
         "pegasus_export": False,
+        "pegasus_replace_assets": True,
     }
     payload.update(overrides)
     return payload
@@ -211,9 +215,11 @@ def test_update_scan_settings_payload_shape(client, access_token: str):
         language_priority=["en", "fr"],
         media=["box2d", "screenshot"],
         gamelist_export=True,
+        gamelist_replace_assets=True,
         gamelist_thumbnail="box2d",
         gamelist_image="screenshot",
         pegasus_export=False,
+        pegasus_replace_assets=True,
     )
 
 

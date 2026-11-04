@@ -118,8 +118,9 @@ def merge_existing_game(game: Element, existing: Element) -> None:
 class GamelistExporter:
     """Export RomM collections to ES-DE gamelist.xml format"""
 
-    def __init__(self, local_export: bool = False):
+    def __init__(self, local_export: bool = False, replace_assets: bool = False):
         self.local_export = local_export
+        self.replace_assets = replace_assets
 
     def _format_release_date(self, timestamp: int) -> str:
         """Format release date to YYYYMMDDTHHMMSS format"""
@@ -212,7 +213,11 @@ class GamelistExporter:
 
                 if platform_dir is not None:
                     dest_path = platform_dir / rel_path
-                    if not place_export_asset(source_path, dest_path):
+                    if not place_export_asset(
+                        source_path,
+                        dest_path,
+                        replace_existing=self.replace_assets,
+                    ):
                         continue
 
                 refs[asset_key] = rel_path

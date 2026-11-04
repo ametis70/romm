@@ -372,6 +372,8 @@
   "scan-artwork-overrides-desc": "Använd vid behov en annan ordning på källor för specifika grafikfält. När funktionen är avstängd följer varje fält grafikprioriteten ovan.",
   "scan-artwork-priority": "Grafikprioritet",
   "scan-artwork-priority-desc": "Ordna källorna som används för omslagsbilder och skärmbilder. Källorna provas uppifrån och ned. Inaktiverade källor hoppas över.",
+  "scan-export-replace-assets": "Ersätt befintliga exporterade mediefiler",
+  "scan-export-replace-assets-desc": "Ersätter motsvarande exporterade mediefiler när det här formatet exporteras efter en genomsökning.",
   "scan-gamelist": "Export av ES-DE- eller Batocera-gamelist",
   "scan-gamelist-export": "Exportera gamelist.xml efter genomsökning",
   "scan-gamelist-export-desc": "Skriv en fil med namnet gamelist.xml för ES-DE, Batocera och RetroBAT när en genomsökning är klar.",

@@ -200,9 +200,11 @@ interface ScanForm {
   language: string[];
   media: string[];
   gamelistExport: boolean;
+  gamelistReplaceAssets: boolean;
   gamelistThumbnail: MetadataMediaType;
   gamelistImage: MetadataMediaType;
   pegasusExport: boolean;
+  pegasusReplaceAssets: boolean;
 }
 
 function configToForm(cfg: Config): ScanForm {
@@ -222,11 +224,13 @@ function configToForm(cfg: Config): ScanForm {
     language: [...(cfg.SCAN_LANGUAGE_PRIORITY ?? [])],
     media: [...(cfg.SCAN_MEDIA ?? [])],
     gamelistExport: cfg.GAMELIST_AUTO_EXPORT_ON_SCAN ?? false,
+    gamelistReplaceAssets: cfg.GAMELIST_REPLACE_ASSETS ?? false,
     gamelistThumbnail: (cfg.GAMELIST_MEDIA_THUMBNAIL ??
       "box2d") as MetadataMediaType,
     gamelistImage: (cfg.GAMELIST_MEDIA_IMAGE ??
       "screenshot") as MetadataMediaType,
     pegasusExport: cfg.PEGASUS_AUTO_EXPORT_ON_SCAN ?? false,
+    pegasusReplaceAssets: cfg.PEGASUS_REPLACE_ASSETS ?? false,
   };
 }
 
@@ -241,9 +245,11 @@ function formToPayload(f: ScanForm): ScanSettingsPayload {
     language_priority: f.language,
     media: f.media as MetadataMediaType[],
     gamelist_export: f.gamelistExport,
+    gamelist_replace_assets: f.gamelistReplaceAssets,
     gamelist_thumbnail: f.gamelistThumbnail,
     gamelist_image: f.gamelistImage,
     pegasus_export: f.pegasusExport,
+    pegasus_replace_assets: f.pegasusReplaceAssets,
   };
 }
 
@@ -488,6 +494,12 @@ useUnloadGuard(hasPendingEdits);
           :description="t('settings.scan-gamelist-export-desc')"
           :disabled="!canEdit"
         />
+        <SettingsToggleRow
+          v-model="form.gamelistReplaceAssets"
+          :title="t('settings.scan-export-replace-assets')"
+          :description="t('settings.scan-export-replace-assets-desc')"
+          :disabled="!canEdit || !form.gamelistExport"
+        />
       </div>
       <div class="r-scan-settings__field r-scan-settings__field--bordered">
         <RSelect
@@ -528,6 +540,12 @@ useUnloadGuard(hasPendingEdits);
           :title="t('settings.scan-pegasus-export')"
           :description="t('settings.scan-pegasus-export-desc')"
           :disabled="!canEdit"
+        />
+        <SettingsToggleRow
+          v-model="form.pegasusReplaceAssets"
+          :title="t('settings.scan-export-replace-assets')"
+          :description="t('settings.scan-export-replace-assets-desc')"
+          :disabled="!canEdit || !form.pegasusExport"
         />
       </div>
     </SettingsSection>

@@ -40,9 +40,11 @@ export type ConfigResponse = {
     SCAN_LANGUAGE_PRIORITY: Array<string>;
     SCAN_MEDIA: Array<string>;
     GAMELIST_AUTO_EXPORT_ON_SCAN: boolean;
+    GAMELIST_REPLACE_ASSETS: boolean;
     GAMELIST_MEDIA_THUMBNAIL: MetadataMediaType;
     GAMELIST_MEDIA_IMAGE: MetadataMediaType;
     PEGASUS_AUTO_EXPORT_ON_SCAN: boolean;
+    PEGASUS_REPLACE_ASSETS: boolean;
     CONVERTO: ConvertoConfig;
     CONVERTO_LIBRARY_TARGETS: Record<string, Array<string>>;
 };

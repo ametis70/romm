@@ -1441,7 +1441,10 @@ async def scan_platforms(
 
         if config.GAMELIST_AUTO_EXPORT_ON_SCAN:
             log.info("Auto-exporting gamelist.xml for all platforms...")
-            gamelist_exporter = GamelistExporter(local_export=True)
+            gamelist_exporter = GamelistExporter(
+                local_export=True,
+                replace_assets=config.GAMELIST_REPLACE_ASSETS,
+            )
             for platform_slug in platform_list:
                 platform = db_platforms_by_slug.get(platform_slug)
                 if platform:
@@ -1461,7 +1464,10 @@ async def scan_platforms(
 
         if config.PEGASUS_AUTO_EXPORT_ON_SCAN:
             log.info("Auto-exporting metadata.pegasus.txt for all platforms...")
-            pegasus_exporter = PegasusExporter(local_export=True)
+            pegasus_exporter = PegasusExporter(
+                local_export=True,
+                replace_assets=config.PEGASUS_REPLACE_ASSETS,
+            )
             for platform_slug in platform_list:
                 platform = db_platforms_by_slug.get(platform_slug)
                 if platform:
