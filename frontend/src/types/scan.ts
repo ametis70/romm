@@ -2,10 +2,10 @@ import type { ScanType } from "@/__generated__";
 
 export type { ScanType };
 
-/** Whether a scan type is worth starting with no metadata source picked. A
- *  quick scan reconciles files and registers new entries on its own. */
+/** Whether the scan can run without metadata sources. Quick scans reconcile
+ *  files; export-only runs regenerate configured output files. */
 export function scanNeedsMetadataSource(scanType: ScanType): boolean {
-  return scanType !== "quick";
+  return scanType !== "quick" && scanType !== "export";
 }
 
 /** One `scan` socket event. The provider flags are optional because a

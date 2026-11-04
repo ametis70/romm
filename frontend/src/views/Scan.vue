@@ -137,6 +137,11 @@ function onScroll(e: Event) {
 
 const scanOptions = useScanTypeOptions();
 const scanType = ref<ScanType>("quick");
+watch(scanOptions, (options) => {
+  if (!options.some((option) => option.value === scanType.value)) {
+    scanType.value = "quick";
+  }
+});
 
 const needsMetadataSource = computed(() =>
   scanNeedsMetadataSource(scanType.value),
@@ -288,7 +293,7 @@ function stopScan() {
         <!-- 2. Metadata controls: providers (2.1) + proxies (2.2)
              share one section so it reads as "data we pull from
              external sources". -->
-        <section class="r-scan-card__section">
+        <section v-if="scanType !== 'export'" class="r-scan-card__section">
           <h3 class="r-scan-card__section-title">
             {{ t("scan.section-metadata") }}
           </h3>
@@ -357,7 +362,7 @@ function stopScan() {
             {{ t("scan.select-one-source") }}
           </RAlert>
           <RAlert
-            v-if="!calculateHashes"
+            v-if="!calculateHashes && scanType !== 'export'"
             type="warning"
             density="compact"
             :icon="false"
@@ -390,12 +395,20 @@ function stopScan() {
           size="large"
           variant="flat"
           color="primary"
-          prepend-icon="mdi-magnify-scan"
+          :prepend-icon="
+            scanType === 'export' ? 'mdi-file-export-outline' : 'mdi-magnify-scan'
+          "
           :loading="scanning"
           :disabled="!canStartScan"
           @click="scan"
         >
-          {{ scanning ? t("scan.scanning") : t("scan.scan") }}
+          {{
+            scanning
+              ? t("scan.scanning")
+              : scanType === "export"
+                ? t("scan.export-files")
+                : t("scan.scan")
+          }}
         </RBtn>
 
         <RBtn

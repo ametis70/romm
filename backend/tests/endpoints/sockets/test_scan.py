@@ -1836,10 +1836,8 @@ class TestIdentifyPlatformFirmwareReporting:
         assert "firmware_count" not in payload
 
     async def test_reports_zero_when_all_firmware_is_already_known(self, patched):
-        patched.get_firmware_by_filename.side_effect = (
-            lambda platform_id, file_name: Firmware(
-                file_name=file_name, platform_id=platform_id
-            )
+        patched.get_firmware_by_filename.side_effect = lambda platform_id, file_name: (
+            Firmware(file_name=file_name, platform_id=platform_id)
         )
 
         payload = await self._emitted_platform_payload(AsyncMock())
@@ -2199,6 +2197,39 @@ class TestScanSelectedRoms:
                 scan_stats=AsyncMock(),
                 scanned_rom_ids=set(),
             )
+
+
+class TestExportOnlyScan:
+    async def test_exports_enabled_formats_without_scanning(self, patched, mocker):
+        config = MagicMock()
+        config.GAMELIST_AUTO_EXPORT_ON_SCAN = True
+        config.GAMELIST_REPLACE_ASSETS = True
+        config.PEGASUS_AUTO_EXPORT_ON_SCAN = False
+        mocker.patch.object(config_manager, "get_config", return_value=config)
+        mocker.patch.object(scan_module, "notify_scan_end", AsyncMock())
+        mocker.patch.object(scan_module.redis_client, "get", return_value=None)
+
+        gamelist_exporter = mocker.patch.object(scan_module, "GamelistExporter")
+        gamelist_exporter.return_value.export_platform_to_file = AsyncMock(
+            return_value=True
+        )
+        pegasus_exporter = mocker.patch.object(scan_module, "PegasusExporter")
+
+        await scan_platforms(
+            platform_ids=[1],
+            metadata_sources=[],
+            scan_type=ScanType.EXPORT,
+        )
+
+        gamelist_exporter.assert_called_once_with(
+            local_export=True, replace_assets=True
+        )
+        gamelist_exporter.return_value.export_platform_to_file.assert_awaited_once_with(
+            1, request=None
+        )
+        pegasus_exporter.assert_not_called()
+        fs_platform_handler.get_platforms.assert_not_awaited()
+        fs_rom_handler.count_roms.assert_not_awaited()
 
 
 class TestScopedScanSkipsLibraryWork:

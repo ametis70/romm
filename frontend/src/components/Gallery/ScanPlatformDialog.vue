@@ -9,7 +9,7 @@
 // list mirrors the Scan view's per-platform options (no "new
 // platforms": that's a discovery scan against the whole library,
 // not a single platform).
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import ScanHashMatcherSwitches from "@/components/Scan/ScanHashMatcherSwitches.vue";
 import ScanProviderSelect from "@/components/Scan/ScanProviderSelect.vue";
@@ -70,6 +70,11 @@ const scanOptions = computed(() =>
   ),
 );
 const scanType = ref<ScanType>("quick");
+watch(scanOptions, (options) => {
+  if (!options.some((option) => option.value === scanType.value)) {
+    scanType.value = "quick";
+  }
+});
 
 function closeDialog() {
   emit("update:modelValue", false);
@@ -134,7 +139,7 @@ function onScan() {
         </div>
 
         <!-- 1. Providers: General + Specific RSelects. -->
-        <section class="r-scan-plat__section">
+        <section v-if="scanType !== 'export'" class="r-scan-plat__section">
           <h3 class="r-scan-plat__section-title">
             {{ t("scan.section-providers") }}
           </h3>
@@ -159,7 +164,7 @@ function onScan() {
         </section>
 
         <!-- 2. Hash-matcher proxies. -->
-        <section class="r-scan-plat__section">
+        <section v-if="scanType !== 'export'" class="r-scan-plat__section">
           <h3 class="r-scan-plat__section-title">
             {{ t("scan.section-proxies") }}
           </h3>
@@ -180,7 +185,7 @@ function onScan() {
         </section>
 
         <RAlert
-          v-if="!calculateHashes"
+          v-if="!calculateHashes && scanType !== 'export'"
           type="warning"
           density="compact"
           :icon="false"
@@ -195,13 +200,17 @@ function onScan() {
       <RBtn
         variant="translucent"
         color="primary"
-        prepend-icon="mdi-magnify-scan"
+        :prepend-icon="
+          scanType === 'export' ? 'mdi-file-export-outline' : 'mdi-magnify-scan'
+        "
         :disabled="
-          effectiveMetadataSources.length === 0 && scanType !== 'quick'
+          effectiveMetadataSources.length === 0 &&
+          scanType !== 'quick' &&
+          scanType !== 'export'
         "
         @click="onScan"
       >
-        {{ t("scan.scan", "Scan") }}
+        {{ scanType === "export" ? t("scan.export-files") : t("scan.scan", "Scan") }}
       </RBtn>
     </template>
   </RDialog>

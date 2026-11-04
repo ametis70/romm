@@ -1222,6 +1222,102 @@ async def scan_platforms(
         elif not stopped and not roms_ids:
             await notify_scan_end(started_by_user_id, scan_stats)
 
+    async def stop_scan() -> None:
+        log.info(f"{emoji.EMOJI_STOP_SIGN} Scan stopped manually")
+        await finish("scan:done", scan_stats.to_dict(), stopped=True)
+        redis_client.delete(STOP_SCAN_FLAG)
+
+    if scan_type == ScanType.EXPORT:
+        try:
+            config = cm.get_config()
+            if not (
+                config.GAMELIST_AUTO_EXPORT_ON_SCAN
+                or config.PEGASUS_AUTO_EXPORT_ON_SCAN
+            ):
+                await finish(
+                    "scan:done_ko",
+                    "Enable ES-DE/Batocera or Pegasus export in Scan Settings first",
+                )
+                return scan_stats
+
+            db_platforms = db_platform_handler.get_platforms()
+            selected_ids = set(platform_ids)
+            selected_slugs = set(platform_fs_slugs)
+            if roms_ids:
+                selected_ids.update(
+                    rom.platform_id for rom in db_rom_handler.get_roms_by_ids(roms_ids)
+                )
+            has_selection = bool(selected_ids or selected_slugs)
+            platforms_to_export = sorted(
+                (
+                    platform
+                    for platform in db_platforms
+                    if not has_selection
+                    or platform.id in selected_ids
+                    or platform.fs_slug in selected_slugs
+                ),
+                key=lambda platform: platform.fs_slug,
+            )
+            await scan_stats.update(
+                socket_manager=socket_manager,
+                total_platforms=len(platforms_to_export),
+            )
+
+            gamelist_exporter = (
+                GamelistExporter(
+                    local_export=True,
+                    replace_assets=config.GAMELIST_REPLACE_ASSETS,
+                )
+                if config.GAMELIST_AUTO_EXPORT_ON_SCAN
+                else None
+            )
+            pegasus_exporter = (
+                PegasusExporter(
+                    local_export=True,
+                    replace_assets=config.PEGASUS_REPLACE_ASSETS,
+                )
+                if config.PEGASUS_AUTO_EXPORT_ON_SCAN
+                else None
+            )
+
+            for platform in platforms_to_export:
+                if redis_client.get(STOP_SCAN_FLAG):
+                    await stop_scan()
+                    return scan_stats
+
+                if gamelist_exporter is not None:
+                    if await gamelist_exporter.export_platform_to_file(
+                        platform.id, request=None
+                    ):
+                        log.info(f"Exported gamelist.xml for platform {platform.name}")
+                    else:
+                        log.warning(
+                            f"Failed to export gamelist.xml for {platform.name}"
+                        )
+
+                if pegasus_exporter is not None:
+                    if await pegasus_exporter.export_platform_to_file(
+                        platform.id, request=None
+                    ):
+                        log.info(
+                            f"Exported metadata.pegasus.txt for platform {platform.name}"
+                        )
+                    else:
+                        log.warning(
+                            f"Failed to export metadata.pegasus.txt for {platform.name}"
+                        )
+
+                await scan_stats.increment(socket_manager, scanned_platforms=1)
+
+            await finish("scan:done", scan_stats.to_dict())
+        except ScanStoppedException:
+            await stop_scan()
+        except Exception as e:
+            log.error(f"Error in export-only scan: {e}")
+            await finish("scan:done_ko", str(e))
+            raise
+        return scan_stats
+
     # A ROM-id-scoped scan resolves its work from the database, so it neither
     # needs nor can afford the filesystem walk a library scan starts with.
     scoped_roms_by_platform: dict[int, list[Rom]] = {}
@@ -1345,11 +1441,6 @@ async def scan_platforms(
         total_platforms=total_platforms,
         total_roms=total_roms,
     )
-
-    async def stop_scan() -> None:
-        log.info(f"{emoji.EMOJI_STOP_SIGN} Scan stopped manually")
-        await finish("scan:done", scan_stats.to_dict(), stopped=True)
-        redis_client.delete(STOP_SCAN_FLAG)
 
     try:
         if roms_ids:

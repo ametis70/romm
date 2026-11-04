@@ -47,6 +47,7 @@ class ScanType(enum.StrEnum):
     UNMATCHED = "unmatched"
     COMPLETE = "complete"
     HASHES = "hashes"
+    EXPORT = "export"
 
 
 @enum.unique

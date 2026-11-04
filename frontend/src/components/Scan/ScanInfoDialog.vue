@@ -92,6 +92,11 @@ const scanTypes = computed<ScanTypeRow[]>(() => [
     title: t("scan.complete-rescan"),
     desc: t("scan.info-complete-rescan-desc"),
   },
+  {
+    id: "export",
+    title: t("scan.export-files"),
+    desc: t("scan.info-export-files-desc"),
+  },
 ]);
 
 // Static reference set: names, logos and `setup.*` locale keys come

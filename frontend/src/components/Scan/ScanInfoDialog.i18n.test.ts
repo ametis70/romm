@@ -14,6 +14,7 @@ const SINGLE_PARAGRAPH = [
   "info-new-platforms-desc",
   "info-quick-scan-desc",
   "info-hashes-desc",
+  "info-export-files-desc",
 ] as const;
 
 const TWO_PARAGRAPHS = [
