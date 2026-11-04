@@ -65,8 +65,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    outputs:
-      digest-repo: ${{ steps.repo.outputs.ref }}
     env:
       USE_GHCR: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.registry == 'ghcr' || github.event.inputs.registry == 'both' }}
       USE_DOCKERHUB: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.registry == 'dockerhub' || github.event.inputs.registry == 'both') }}
@@ -176,6 +174,17 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Resolve digest repository
+        id: repo
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          if [[ "${USE_GHCR}" == "true" ]]; then
+            echo "ref=ghcr.io/${OWNER}/romm-testing" >>"$GITHUB_OUTPUT"
+          else
+            echo "ref=${DOCKERHUB_NAMESPACE}/romm-testing" >>"$GITHUB_OUTPUT"
+          fi
+
       - name: Generate Docker metadata
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
@@ -191,7 +200,7 @@ jobs:
       - name: Create manifest list and push
         working-directory: /tmp/digests
         env:
-          DIGEST_REF: ${{ needs.build.outputs.digest-repo }}
+          DIGEST_REF: ${{ steps.repo.outputs.ref }}
           METADATA: ${{ steps.meta.outputs.json }}
         run: |
           tags=()
