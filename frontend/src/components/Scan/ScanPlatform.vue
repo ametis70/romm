@@ -99,7 +99,9 @@ function getItemKey(item: unknown) {
          content height regardless of how many rows have streamed in,
          and bounds the DOM size on big platforms. -->
     <div v-if="platform.roms.length === 0" class="r-scan-platform__empty">
-      {{ t("scan.no-new-roms") }}
+      {{
+        t(platform.export_only ? "scan.no-exported-games" : "scan.no-new-roms")
+      }}
     </div>
     <RVirtualScroller
       v-else
@@ -111,7 +113,10 @@ function getItemKey(item: unknown) {
       class="r-scan-platform__virtual"
     >
       <template #default="{ item }">
-        <ScanPlatformRow :rom="item as SimpleRom" />
+        <ScanPlatformRow
+          :rom="item as SimpleRom"
+          :exported="platform.export_only ?? false"
+        />
       </template>
     </RVirtualScroller>
   </RCollapsible>

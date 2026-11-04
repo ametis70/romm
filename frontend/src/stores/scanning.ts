@@ -10,6 +10,8 @@ export interface ScanningPlatform extends Pick<
   roms: SimpleRom[];
   /** Firmware discovered by the running scan, not the platform's total. */
   new_firmware_count: number;
+  /** Whether this panel lists games included in an export instead of scanned ROMs. */
+  export_only?: boolean;
 }
 
 export default defineStore("scanning", {

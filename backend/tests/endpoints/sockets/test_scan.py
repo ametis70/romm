@@ -2200,7 +2200,12 @@ class TestScanSelectedRoms:
 
 
 class TestExportOnlyScan:
-    async def test_exports_enabled_formats_without_scanning(self, patched, mocker):
+    async def test_exports_enabled_formats_without_scanning(
+        self, patched, mocker, platform
+    ):
+        mocker.patch.object(
+            db_platform_handler, "get_platforms", return_value=[platform]
+        )
         config = MagicMock()
         config.GAMELIST_AUTO_EXPORT_ON_SCAN = True
         config.GAMELIST_REPLACE_ASSETS = True
@@ -2209,6 +2214,11 @@ class TestExportOnlyScan:
         mocker.patch.object(scan_module, "notify_scan_end", AsyncMock())
         mocker.patch.object(scan_module.redis_client, "get", return_value=None)
 
+        rom = MagicMock()
+        mocker.patch.object(db_rom_handler, "get_roms_scalar", return_value=[rom])
+        emit_exported_rom = mocker.patch.object(
+            scan_module, "emit_exported_rom", AsyncMock()
+        )
         gamelist_exporter = mocker.patch.object(scan_module, "GamelistExporter")
         gamelist_exporter.return_value.export_platform_to_file = AsyncMock(
             return_value=True
@@ -2216,7 +2226,7 @@ class TestExportOnlyScan:
         pegasus_exporter = mocker.patch.object(scan_module, "PegasusExporter")
 
         await scan_platforms(
-            platform_ids=[1],
+            platform_ids=[platform.id],
             metadata_sources=[],
             scan_type=ScanType.EXPORT,
         )
@@ -2225,9 +2235,16 @@ class TestExportOnlyScan:
             local_export=True, replace_assets=True
         )
         gamelist_exporter.return_value.export_platform_to_file.assert_awaited_once_with(
-            1, request=None
+            platform.id, request=None
         )
         pegasus_exporter.assert_not_called()
+        emit_exported_rom.assert_awaited_once_with(patched, rom)
+        platform_event = next(
+            call.args[1]
+            for call in patched.emit.await_args_list
+            if call.args[0] == "scan:scanning_platform"
+        )
+        assert platform_event["export_only"] is True
         fs_platform_handler.get_platforms.assert_not_awaited()
         fs_rom_handler.count_roms.assert_not_awaited()
 

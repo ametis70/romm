@@ -193,6 +193,32 @@ describe("installScanLifecycle", () => {
     expect(refresh).toHaveBeenCalledTimes(1);
   });
 
+  it("lists games included in an export without treating them as scanned ROMs", () => {
+    install();
+    const scanning = storeScanning();
+    const rom = simpleRom({
+      platform_fs_slug: "n64",
+      platform_display_name: "Nintendo 64",
+      platform_slug: "n64",
+    });
+
+    fire("scan:scanning_platform", {
+      id: 1,
+      name: "Nintendo 64",
+      display_name: "Nintendo 64",
+      slug: "n64",
+      fs_slug: "n64",
+      is_identified: true,
+      new_firmware_count: 0,
+      export_only: true,
+    });
+    fire("scan:exported_rom", rom);
+
+    expect(scanning.scanningPlatforms[0]?.export_only).toBe(true);
+    expect(scanning.scanningPlatforms[0]?.roms).toEqual([rom]);
+    expect(storeRoms().recentRoms).toEqual([]);
+  });
+
   it("counts only the ROMs a scan added toward the platform's games", async () => {
     install();
     const platforms = storePlatforms();

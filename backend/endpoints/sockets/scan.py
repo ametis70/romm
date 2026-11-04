@@ -81,6 +81,7 @@ from handler.scan.sources import (
 from handler.scan_handler import (
     build_hashless_fs_rom,
     download_rom_resources,
+    emit_exported_rom,
     emit_scanning_rom,
     persist_soundtrack_cover,
     scan_firmware,
@@ -101,7 +102,7 @@ from models.audit_event import AuditAction
 from models.firmware import Firmware
 from models.notification import NotificationKind, NotificationLevel
 from models.platform import Platform
-from models.rom import Rom, RomFile
+from models.rom import HAS_FILE_ON_DISK_FILTERS, Rom, RomFile
 from models.user import User
 from tasks.tasks import TaskType, update_job_meta
 from utils import emoji
@@ -1285,10 +1286,13 @@ async def scan_platforms(
                     await stop_scan()
                     return scan_stats
 
+                export_succeeded = False
                 if gamelist_exporter is not None:
-                    if await gamelist_exporter.export_platform_to_file(
+                    exported = await gamelist_exporter.export_platform_to_file(
                         platform.id, request=None
-                    ):
+                    )
+                    export_succeeded |= exported
+                    if exported:
                         log.info(f"Exported gamelist.xml for platform {platform.name}")
                     else:
                         log.warning(
@@ -1296,9 +1300,11 @@ async def scan_platforms(
                         )
 
                 if pegasus_exporter is not None:
-                    if await pegasus_exporter.export_platform_to_file(
+                    exported = await pegasus_exporter.export_platform_to_file(
                         platform.id, request=None
-                    ):
+                    )
+                    export_succeeded |= exported
+                    if exported:
                         log.info(
                             f"Exported metadata.pegasus.txt for platform {platform.name}"
                         )
@@ -1306,6 +1312,30 @@ async def scan_platforms(
                         log.warning(
                             f"Failed to export metadata.pegasus.txt for {platform.name}"
                         )
+
+                if export_succeeded:
+                    await socket_manager.emit(
+                        "scan:scanning_platform",
+                        {
+                            **PlatformSchema.model_validate(platform).model_dump(
+                                include={
+                                    "id",
+                                    "name",
+                                    "display_name",
+                                    "slug",
+                                    "fs_slug",
+                                    "is_identified",
+                                }
+                            ),
+                            "new_firmware_count": 0,
+                            "export_only": True,
+                        },
+                    )
+                    roms = db_rom_handler.get_roms_scalar(
+                        platform_ids=[platform.id], **HAS_FILE_ON_DISK_FILTERS
+                    )
+                    for rom in roms:
+                        await emit_exported_rom(socket_manager, rom)
 
                 await scan_stats.increment(socket_manager, scanned_platforms=1)
 

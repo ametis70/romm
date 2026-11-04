@@ -11,6 +11,7 @@
 //   * `scan:scanning_rom`:      per-ROM update during a scan. Batched on
 //                                a 100ms debounce window so a thousand
 //                                rapid-fire updates don't tank rendering.
+//   * `scan:exported_rom`:      ROM included in an export-only run.
 //   * `scan:update_stats`:      periodic progress; keep `scanStats` fresh.
 //   * `scan:done`:              scan finished; persist the final stats,
 //                                flip `scanning` off so the indicator hides,
@@ -64,6 +65,7 @@ export function installScanLifecycle() {
       fs_slug,
       is_identified,
       new_firmware_count,
+      export_only,
     }) => {
       scanningStore.setScanning(true);
       // De-dupe by display_name so a re-scan of the same platform
@@ -82,6 +84,7 @@ export function installScanLifecycle() {
         roms: [],
         new_firmware_count,
         is_identified,
+        export_only: export_only ?? false,
       });
 
       // Surface brand-new platforms the moment the scan reaches them. The
@@ -178,6 +181,36 @@ export function installScanLifecycle() {
     scanningStore.setScanning(true);
     romUpdateQueue.push(rom);
     processRomUpdates();
+  });
+
+  useSocketEvent<SimpleRom>("scan:exported_rom", (rom) => {
+    scanningStore.setScanning(true);
+    let platform = scanningStore.scanningPlatforms.find(
+      (p) => p.fs_slug === rom.platform_fs_slug,
+    );
+    if (!platform) {
+      platform = {
+        id: rom.platform_id,
+        name: rom.platform_display_name,
+        display_name: rom.platform_display_name,
+        slug: rom.platform_slug,
+        fs_slug: rom.platform_fs_slug,
+        is_identified: true,
+        roms: [],
+        new_firmware_count: 0,
+        export_only: true,
+      };
+      scanningStore.scanningPlatforms.unshift(platform);
+    }
+
+    const existing = platform.roms.find((item) => item.id === rom.id);
+    if (existing) {
+      platform.roms = platform.roms.map((item) =>
+        item.id === rom.id ? rom : item,
+      );
+    } else {
+      platform.roms.unshift(rom);
+    }
   });
 
   // Stats are the only event a scan emits continuously: `scanning_platform`

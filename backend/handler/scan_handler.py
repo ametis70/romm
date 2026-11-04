@@ -292,6 +292,16 @@ async def emit_scanning_rom(
     await socket_manager.emit("scan:scanning_rom", payload)
 
 
+async def emit_exported_rom(
+    socket_manager: socketio.AsyncRedisManager, rom: Rom
+) -> None:
+    """Report a ROM included in an export-only scan."""
+    payload = SimpleRomSchema.from_orm_with_factory(rom).model_dump(
+        exclude=_SCANNING_ROM_EXCLUDE
+    )
+    await socket_manager.emit("scan:exported_rom", payload)
+
+
 def _log_unidentified(
     rom_attrs: dict[str, Any], inconclusive_sources: set[MetadataSource]
 ) -> None:

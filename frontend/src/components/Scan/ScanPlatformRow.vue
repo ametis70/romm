@@ -18,6 +18,7 @@ defineOptions({ inheritAttrs: false });
 
 const props = defineProps<{
   rom: SimpleRom;
+  exported?: boolean;
 }>();
 
 const { t } = useI18n();
@@ -99,6 +100,12 @@ function coverFor(rom: SimpleRom): string {
       </div>
     </div>
     <div class="r-scan-platform__rom-meta">
+      <RTag
+        v-if="props.exported"
+        tone="success"
+        size="x-small"
+        :text="t('scan.exported')"
+      />
       <template v-if="props.rom.is_identifying">
         <RTag
           tone="warning"
